@@ -32,11 +32,12 @@ public class CourseDAO implements ICourse{
         + " periodo, idioma, informacionAdicional)"
         + " values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         DatabaseManager databaseManager = new DatabaseManager();
-        int rowsAffected = -1; 
+        ResultSet resultSet = null;
+        int result = -1; 
         
         try {
             connection = databaseManager.getConnection();
-            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement = connection.prepareCall(statement);
             
             preparedStatement.setInt(1, course.getProfessor().getIdProfessor());
             preparedStatement.setString(2, course.getName());        
@@ -48,12 +49,19 @@ public class CourseDAO implements ICourse{
             preparedStatement.setString(8, course.getLanguage());
             preparedStatement.setString(9, course.getAdditionalInformation());
             
-            rowsAffected = preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
+            resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                result = resultSet.getInt(1);
+            }
         } catch (SQLException exception) {
             Logger.getLogger(CourseDAO.class.getName()).log(Level.SEVERE, null, exception);
             throw new DAOException("No fue posible registrar el curso", Status.WARNING);
         } finally {
             try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
                 if (preparedStatement != null) {
                     preparedStatement.close();
                 }
@@ -64,8 +72,13 @@ public class CourseDAO implements ICourse{
                 Logger.getLogger(CourseDAO.class.getName()).log(Level.SEVERE, null, exception);
             }
         }
-        return rowsAffected;
+        return result;
     }
+    
+    //@Override
+    //public Course getCourseByIdCourse(int idCourse) throws DAOException {
+    // 
+    //}
     
     @Override
     public List<Course> getCoursesByStatus(String state) throws DAOException {
@@ -87,7 +100,6 @@ public class CourseDAO implements ICourse{
             resultSet = preparedStatement.executeQuery();
             
             while (resultSet != null && resultSet.next()) {
-                course.setIdProfessor(resultSet.getInt("idProfesor"));
                 course.setName(resultSet.getString("nombre"));
                 course.setStatus(resultSet.getString("estado"));
                 course.setGeneralObjective(resultSet.getString("objetivoGeneral"));
@@ -97,7 +109,7 @@ public class CourseDAO implements ICourse{
                 course.setTerm(resultSet.getString("periodo"));
                 course.setLanguage(resultSet.getString("idioma"));
                 course.setAdditionalInformation(resultSet.getString("informacionAdicional"));
-                professor = professorDAO.getProfessorById(course.getIdProfessor());
+                professor = professorDAO.getProfessorById(course.getProfessor().getIdProfessor());
                 course.setProfessor(professor);
                 courses.add(course);
             }
@@ -154,5 +166,37 @@ public class CourseDAO implements ICourse{
         }
         return rowsAffected;
     }   
+    
+    @Override
+    public int deleteCourseByIdCourse(int idCourse) throws DAOException {
+        DatabaseManager databaseManager = new DatabaseManager();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String statement = "delete from Curso where idCurso = ?";
+        int rowsAffected = -1;
+        
+        try {
+            connection = databaseManager.getConnection();
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1, idCourse);
+            
+            rowsAffected = preparedStatement.executeUpdate();
+        } catch (SQLException exception) {
+            Logger.getLogger(CourseDAO.class.getName()).log(Level.SEVERE, null, exception);
+            throw new DAOException("No fue posible cambiar el estado del curso", Status.WARNING);
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException exception) {
+                
+            }
+        }
+        return rowsAffected;
+    }
 }
 

@@ -10,7 +10,8 @@ import mx.fei.coilvicapp.logic.implementations.DAOException;
 public interface ICourse {
 
     public int insertCourse(Course course) throws DAOException;
+    //public Course getCourseByIdCourse(int idCourse) throws DAOException;
     public List<Course> getCoursesByStatus(String state) throws DAOException;    
     public int updateCourseStatusByIdCourse(int idCourse, String newState) throws DAOException;
-    
+    public int deleteCourseByIdCourse(int idCourse) throws DAOException;
 }

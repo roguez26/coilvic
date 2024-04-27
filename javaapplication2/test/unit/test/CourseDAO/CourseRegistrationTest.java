@@ -85,7 +85,7 @@ public class CourseRegistrationTest {
         + " programacion estructurada y orientada a objetos");
         COURSE_FOR_TESTING.setTopicsInterest("Abstraccion, Herencia, Polimorfismo");
         COURSE_FOR_TESTING.setNumberStudents(35);
-        COURSE_FOR_TESTING.setStudentPorfile("Ingenieria de software");
+        COURSE_FOR_TESTING.setStudentsProfile("Ingenieria de software");
         COURSE_FOR_TESTING.setTerm("Febrero-Junio 2024");
         COURSE_FOR_TESTING.setLanguage("Ingles");
         COURSE_FOR_TESTING.setAdditionalInformation("Ademas de la progrmacion"
@@ -94,21 +94,22 @@ public class CourseRegistrationTest {
 
     @Test
     public void testInsertCourseSucces() {
-        int result = 0;
+        int idCourse = 0;
         
         try {
-            result = COURSE_DAO.insertCourse(COURSE_FOR_TESTING);
+            idCourse = COURSE_DAO.insertCourse(COURSE_FOR_TESTING);
+            COURSE_FOR_TESTING.setIdCourse(idCourse);
         } catch (DAOException exception) {
             Logger.getLogger(CourseRegistrationTest.class.getName()).log(Level.SEVERE, null, exception);
         }
         
-        assertTrue(result > 0);     
+        assertTrue(idCourse > 0);     
     }
     
     @After
     public void tearDown() {
         try {
-            //delete curso
+            COURSE_DAO.deleteCourseByIdCourse(COURSE_FOR_TESTING.getIdCourse());
             PROFESSOR_DAO.deleteProfessorByID(AUX_PROFESSOR.getIdProfessor());
             UNIVERSITY_DAO.deleteUniversity(AUX_UNIVERSITY.getIdUniversity());
             COUNTRY_DAO.deleteCountry(AUX_COUNTRY.getIdCountry());
@@ -116,6 +117,4 @@ public class CourseRegistrationTest {
             Logger.getLogger(CourseRegistrationTest.class.getName()).log(Level.SEVERE, null, exception);
         }
     }
-    
-    
 }
