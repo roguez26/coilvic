@@ -13,126 +13,28 @@ import mx.fei.coilvicapp.logic.implementations.DAOException;
 import mx.fei.coilvicapp.logic.implementations.Status;
 
 public class ProfessorDAO implements IProfessor {
-    
-    private boolean checkEmailDuplication(Professor professor) throws DAOException {
-        Professor professorAux;
-        int idProfessor = 0;
-
-        try {
-            professorAux = getProfessorByEmail(professor.getEmail());
-            idProfessor = professorAux.getIdProfessor();
-        } catch (DAOException exception) {
-            throw new DAOException("No fue posible realizar la validacion, intente registrar mas tarde.", Status.ERROR);
-        }
-        if (idProfessor != professor.getIdProfessor() && idProfessor > 0) {
-            throw new DAOException("El correo ya se encuentra registrado", Status.WARNING);
-        }
-        return false;
-    }
-    
+       
+    @Override
     public int registerProfessor(Professor professor) throws DAOException {
         int result = 0;
 
         if (!checkEmailDuplication(professor)) {
-            result = insertProfessor(professor);
+            result = insertProfessorTransaction(professor);
         }
         return result;        
     }
     
-    @Override
-    public int insertProfessor(Professor professor) throws DAOException {
-        int result = -1;
-        ResultSet resultSet = null;
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        String statement = "INSERT INTO profesor(nombre, apellidoPaterno, apellidoMaterno, correo, genero, telefono, idUniversidad) "
-                + "VALUES(?, ?, ?, ?, ?, ?, ?);";
-        DatabaseManager databaseManager = new DatabaseManager();
 
-        try {
-            connection = databaseManager.getConnection();
-            preparedStatement = connection.prepareCall(statement);
-            preparedStatement.setString(1, professor.getName());
-            preparedStatement.setString(2, professor.getPaternalSurname());
-            preparedStatement.setString(3, professor.getMaternalSurname());
-            preparedStatement.setString(4, professor.getEmail());
-            preparedStatement.setString(5, professor.getGender());
-            preparedStatement.setString(6, professor.getPhoneNumber());
-            preparedStatement.setInt(7, professor.getIdUniversity());
-            preparedStatement.executeUpdate();         
-            resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                result = resultSet.getInt(1);
-            }
-            
-        } catch (SQLException exception) {
-            Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
-            throw new DAOException("No fue posible registrar al profesor", Status.ERROR);
-        } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }
-            } catch (SQLException exception) {
-                Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
-            }
-        }
-        return result;        
-    }
-
-    public int updateProfessorVerification(Professor newProfessorInformation) throws DAOException {   
+    @Override    
+    public int updateProfessor(Professor newProfessorInformation) throws DAOException {   
         int result = 0;
 
         if (!checkEmailDuplication(newProfessorInformation)) {
-            result = updateProfessor(newProfessorInformation);
+            result = updateProfessorTransaction(newProfessorInformation);
         }
         return result;          
     }
     
-    @Override
-    public int updateProfessor(Professor newProfessorInformation) throws DAOException {   
-        int result = -1;
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        String statement = "UPDATE profesor SET nombre = ?, apellidoPaterno = ?,"
-                + " apellidoMaterno = ?, correo = ?, genero = ?, telefono = ? WHERE idProfesor = ?";
-        DatabaseManager databaseManager = new DatabaseManager();
-        
-        try {
-            connection = databaseManager.getConnection();
-            preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setString(1, newProfessorInformation.getName());
-            preparedStatement.setString(2, newProfessorInformation.getPaternalSurname());
-            preparedStatement.setString(3, newProfessorInformation.getMaternalSurname());
-            preparedStatement.setString(4, newProfessorInformation.getEmail());
-            preparedStatement.setString(5, newProfessorInformation.getGender());
-            preparedStatement.setString(6, newProfessorInformation.getPhoneNumber());
-            preparedStatement.setInt(7, newProfessorInformation.getIdProfessor());
-            result = preparedStatement.executeUpdate();      
-        } catch (SQLException exception) {
-            Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
-            throw new DAOException("No fue posible actualizar al profesor", Status.ERROR);
-        } finally {
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-                if (connection != null) {
-                    connection.close();
-                }               
-            } catch (SQLException exception) {
-                Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
-            }
-        }        
-        return result;
-    }
-
     @Override
     public int deleteProfessorByID(int idProfessor) throws DAOException {     
         int result = -1;
@@ -162,8 +64,8 @@ public class ProfessorDAO implements IProfessor {
             }
         }       
         return result;
-    }
-
+    }    
+    
     @Override
     public Professor getProfessorById(int idProfessor) throws DAOException {        
         Professor professor = new Professor();
@@ -201,7 +103,7 @@ public class ProfessorDAO implements IProfessor {
             }
         }
         return professor;          
-    }
+    }    
     
     @Override
     public Professor getProfessorByEmail(String professorEmail) throws DAOException {
@@ -277,8 +179,107 @@ public class ProfessorDAO implements IProfessor {
             databaseManager.closeConnection();
         }
         return professors;
+    }    
+    
+    private boolean checkEmailDuplication(Professor professor) throws DAOException {
+        Professor professorAux;
+        int idProfessor = 0;
+
+        try {
+            professorAux = getProfessorByEmail(professor.getEmail());
+            idProfessor = professorAux.getIdProfessor();
+        } catch (DAOException exception) {
+            throw new DAOException("No fue posible realizar la validacion, intente registrar mas tarde.", Status.ERROR);
+        }
+        if (idProfessor != professor.getIdProfessor() && idProfessor > 0) {
+            throw new DAOException("El correo ya se encuentra registrado", Status.WARNING);
+        }
+        return false;
     }
     
+    private int insertProfessorTransaction(Professor professor) throws DAOException {
+        int result = -1;
+        ResultSet resultSet = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String statement = "INSERT INTO profesor(nombre, apellidoPaterno, apellidoMaterno, correo, genero, telefono, idUniversidad) "
+                + "VALUES(?, ?, ?, ?, ?, ?, ?);";
+        DatabaseManager databaseManager = new DatabaseManager();
+
+        try {
+            connection = databaseManager.getConnection();
+            preparedStatement = connection.prepareCall(statement);
+            preparedStatement.setString(1, professor.getName());
+            preparedStatement.setString(2, professor.getPaternalSurname());
+            preparedStatement.setString(3, professor.getMaternalSurname());
+            preparedStatement.setString(4, professor.getEmail());
+            preparedStatement.setString(5, professor.getGender());
+            preparedStatement.setString(6, professor.getPhoneNumber());
+            preparedStatement.setInt(7, professor.getIdUniversity());
+            preparedStatement.executeUpdate();         
+            resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                result = resultSet.getInt(1);
+            }
+            
+        } catch (SQLException exception) {
+            Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
+            throw new DAOException("No fue posible registrar al profesor", Status.ERROR);
+        } finally {
+            try {
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException exception) {
+                Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
+            }
+        }
+        return result;        
+    }
+    
+    private int updateProfessorTransaction(Professor newProfessorInformation) throws DAOException {   
+        int result = -1;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String statement = "UPDATE profesor SET nombre = ?, apellidoPaterno = ?,"
+                + " apellidoMaterno = ?, correo = ?, genero = ?, telefono = ? WHERE idProfesor = ?";
+        DatabaseManager databaseManager = new DatabaseManager();
+        
+        try {
+            connection = databaseManager.getConnection();
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, newProfessorInformation.getName());
+            preparedStatement.setString(2, newProfessorInformation.getPaternalSurname());
+            preparedStatement.setString(3, newProfessorInformation.getMaternalSurname());
+            preparedStatement.setString(4, newProfessorInformation.getEmail());
+            preparedStatement.setString(5, newProfessorInformation.getGender());
+            preparedStatement.setString(6, newProfessorInformation.getPhoneNumber());
+            preparedStatement.setInt(7, newProfessorInformation.getIdProfessor());
+            result = preparedStatement.executeUpdate();      
+        } catch (SQLException exception) {
+            Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
+            throw new DAOException("No fue posible actualizar al profesor", Status.ERROR);
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }               
+            } catch (SQLException exception) {
+                Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
+            }
+        }        
+        return result;
+    }
+       
     private Professor initializeProfessor(ResultSet resultSet) throws SQLException {        
         Professor professor = new Professor();
         UniversityDAO universityDAO = new UniversityDAO();
@@ -295,7 +296,7 @@ public class ProfessorDAO implements IProfessor {
         try {
             professor.setUniversity(universityDAO.getUniversityById(idUniversity));
         } catch (DAOException exception) {
-            Logger.getLogger(UniversityDAO.class.getName()).log(Level.SEVERE, null, exception);
+            Logger.getLogger(ProfessorDAO.class.getName()).log(Level.SEVERE, null, exception);
         }
         return professor;  
     }
