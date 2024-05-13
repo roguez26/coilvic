@@ -12,8 +12,9 @@ public interface ICourse {
     public int insertCourse(Course course) throws DAOException;
     public Course getCourseByIdCourse(int idCourse) throws DAOException;
     public List<Course> getCoursesByStatus(String state) throws DAOException;
-    public int updateCourse(Course course) throws DAOException;
-    public int updateCourseStatusByIdCourse(int idCourse, String status) throws DAOException;    
+    public int updateCourse(Course course) throws DAOException;    
+    public int evaluateCourseProposal(Course course, String status) throws DAOException;    
     public List<Course> getCoursesByIdProfessor(int idProfessor) throws DAOException;
+    //public int cancelCourseProposal
     public int deleteCourseByIdCourse(int idCourse) throws DAOException;
 }
