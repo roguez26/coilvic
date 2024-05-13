@@ -178,7 +178,19 @@ public class CourseDAO implements ICourse{
     }
    
     @Override
-    public int updateCourseStatusByIdCourse(int idCourse, String status) throws DAOException {
+    public int evaluateCourseProposal(Course course, String status) throws DAOException {
+        int result = -1;
+        
+        if (course.getStatus().equals("Pendiente")) {
+            result = updateCourseStatusByIdCourse(course, status);
+        } else {
+            throw new DAOException("No puede evaluar un curso que ya fue evaluado", Status.WARNING);
+        }
+        return result;
+    }
+    
+    
+    private int updateCourseStatusByIdCourse(Course course, String status) throws DAOException {
         DatabaseManager databaseManager = new DatabaseManager();
         Connection connection = null;
         PreparedStatement preparedStatement = null;
@@ -190,7 +202,7 @@ public class CourseDAO implements ICourse{
             preparedStatement = connection.prepareStatement(statement);
             
             preparedStatement.setString(1,status);
-            preparedStatement.setInt(2,idCourse);
+            preparedStatement.setInt(2,course.getIdCourse());
             
             rowsAffected = preparedStatement.executeUpdate();
         } catch(SQLException exception) {
@@ -214,7 +226,8 @@ public class CourseDAO implements ICourse{
     @Override
     public int updateCourse(Course course) throws DAOException {
         int result = -1;
-        if (!course.getStatus().equals("Aceptado")) {
+        if (course.getStatus().equals("Pendiente") ||
+            course.getStatus().equals("Rechazado")) {
             result = updateCoursePrivate(course);
         } else {
             throw new DAOException("No puede actualizar un curso que ya fue aceptado", Status.WARNING);
