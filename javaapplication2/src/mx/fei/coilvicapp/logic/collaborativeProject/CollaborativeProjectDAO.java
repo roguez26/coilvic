@@ -1,4 +1,4 @@
-package mx.fei.coilvicapp.logic.collaborativeProject;
+package mx.fei.coilvicapp.logic.collaborativeproject;
 
 
 import mx.fei.coilvicapp.dataaccess.DatabaseManager;
@@ -111,7 +111,6 @@ public class CollaborativeProjectDAO implements ICollaborativeProject{
             collaborativeProject.setGeneralObjective(resultSet.getString("objetivoGeneral"));
             collaborativeProject.setModality(resultSet.getString("modalidad"));
             collaborativeProject.setCode(resultSet.getString("codigo"));
-            collaborativeProject.setStatus(resultSet.getString("estado"));
             collaborativeProject.setSyllabusPath(resultSet.getString("rutaSyllabus"));
         } catch (SQLException exception) {
             Logger.getLogger(CollaborativeProjectDAO.class.getName()).log(Level.SEVERE, null, exception);            
