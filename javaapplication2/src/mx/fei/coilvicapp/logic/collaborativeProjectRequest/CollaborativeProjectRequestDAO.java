@@ -21,6 +21,11 @@ public class CollaborativeProjectRequestDAO implements ICollaborativeProjectRequ
     public CollaborativeProjectRequestDAO() {
     }    
     
+    
+    /* En el uso de este switch no vi necesario colocar la sentencia break por cada case
+    ya que al entrar a cada case lanza una excepcion, esto rompe el flujo
+    y de esta manera se sustituye el break*/
+
     @Override
     public int registerCollaborativeProjectRequest(CollaborativeProjectRequest collaborativeProjectRequest) throws DAOException {
         int result = -1;
