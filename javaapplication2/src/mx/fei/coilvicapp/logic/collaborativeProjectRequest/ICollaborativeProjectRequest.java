@@ -13,5 +13,6 @@ public interface ICollaborativeProjectRequest {
     public List<CollaborativeProjectRequest> getReceivedCollaborativeProjectRequestByIdProfessorAndStatus(int idProfessor, String status) throws DAOException;
     public List<CollaborativeProjectRequest> getSentCollaborativeProjectRequestByIdProfessorAndStatus(int idProfessor, String status) throws DAOException;
     public int attendCollaborativeProjectRequest(int idCollaborativeProjectRequest, String status) throws DAOException;
+    //public int cancelCollaborativeProjectRequest()
     public int deleteCollaborativeProjectRequestByidCollaborativeProjectRequest(int idCollaborativeProjectRequest) throws DAOException;
 }
